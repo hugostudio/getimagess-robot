@@ -1,0 +1,32 @@
+version: '3.6'
+
+services:
+  redis:
+    build: ./docker/redis/.
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - robot-network
+
+  web-api:
+    build: ./docker/web/.
+    working_dir: /restBase
+    environment:
+      - HTTP_PORT=${HTTP_PORT}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - PARSER_JSON_LIMIT=${PARSER_JSON_LIMIT}
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "5859:5859"
+    volumes:
+      - ./:/restBase
+    networks:
+      - robot-network
+    command: sh -c "npm run start:dev"
+    depends_on:
+      - redis
+
+networks:
+  robot-network:
+    driver: bridge
